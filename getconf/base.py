@@ -22,7 +22,7 @@ else:
     logger.addHandler(compat.NullHandler())
 
 
-ConfigKey = collections.namedtuple('ConfigKey', ['section', 'entry', 'envvar', 'doc'])
+ConfigKey = collections.namedtuple('ConfigKey', ['section', 'entry', 'envvar', 'default', 'doc'])
 
 
 class ConfigGetter(object):
@@ -126,7 +126,7 @@ class ConfigGetter(object):
 
         value = self._read_env(env_key, value)
 
-        self.seen_keys.add(ConfigKey(section=config_section, entry=key, envvar=env_key, doc=doc))
+        self.seen_keys.add(ConfigKey(section=config_section, entry=key, envvar=env_key, default=default, doc=doc))
 
         return value
 

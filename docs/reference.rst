@@ -16,12 +16,13 @@ Reference
                               each overriding previous values. ``<NAMESPACE>_CONFIG`` takes precedence over
                               all ``config_files`` contents.
 
-    .. method:: get(key[, default=''])
+    .. method:: get(key[, default='', doc=''])
 
         Retrieve a key from available environments.
 
         :param str key: The name of the field to use.
         :param str default: The default value (string) for the field; optional
+        :param str doc: A documentation (string) for the field; optional
 
         .. note:: The ``key`` param accepts two formats:
 
@@ -35,7 +36,7 @@ Reference
         - The ``<key>`` entry of the ``<section>`` section of each file given in ``config_files``
         - The ``default`` value
 
-    .. method:: getlist(key[, default=''])
+    .. method:: getlist(key[, default='', doc=''])
 
         Retrieve a key from available configuration sources, and parse it as a list.
 
@@ -55,7 +56,7 @@ Reference
             >>> getter.get('b')
             ['foo', 'bar', 'baz']
 
-    .. method:: getbool(key[, default=False])
+    .. method:: getbool(key[, default=False, doc=''])
 
         Retrieve a key from available configuration sources, and parse it as a boolean.
 
@@ -70,6 +71,24 @@ Reference
 
         .. note:: The returned object only supports the ``__getitem__`` side of dicts
                   (e.g. ``section_config['foo']`` will work, ``'foo' in section_config`` won't)
+
+    .. method:: list_keys()
+
+        List all keys retrieved until now, sorted by section and key name.
+        Usefull to know at once all configurable options in a program.
+
+        :returns list of ConfigKey: All keys retrieved until now.
+
+
+.. class:: ConfigKey
+
+    A named tuple representing a key.
+
+    :param str section: The name of the section in files.
+    :param str entry: The name of the entry in the file.
+    :param str envvar: The environment key looked up.
+    :param default: The default value of the key.
+    :param str doc: The documentation of the key.
 
 
 Example

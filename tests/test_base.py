@@ -11,6 +11,7 @@ import unittest
 import warnings
 
 import getconf
+from getconf.base import ConfigKey
 
 
 class Environ(object):
@@ -238,6 +239,19 @@ class ConfigGetterTestCase(unittest.TestCase):
 
         with Environ(TESTNS_ENCODING_NOASCII="ßlūelÿ"):
             self.assertEqual("ßlūelÿ", getter.get('encoding.noascii'))
+
+    def test_list_keys(self):
+        getter = getconf.ConfigGetter('TESTNS', [self.example_path])
+
+        getter.get('foo', 'foo', doc='some doc')
+        getter.get('bar')
+        getter.get('section1.foo')
+
+        self.assertEqual(getter.list_keys(), [
+            ConfigKey(section=u'DEFAULT', entry=u'bar', envvar=u'TESTNS_BAR', default=u'', doc=u''),
+            ConfigKey(section=u'DEFAULT', entry=u'foo', envvar=u'TESTNS_FOO', default=u'foo', doc=u'some doc'),
+            ConfigKey(section=u'section1', entry=u'foo', envvar=u'TESTNS_SECTION1_FOO', default=u'', doc=u'')
+        ])
 
 
 if __name__ == '__main__':
