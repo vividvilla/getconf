@@ -424,6 +424,15 @@ class ConfigGetterTestCase(unittest.TestCase):
         with Environ(TESTNS_SECTION1_FOO='blah'):
             self.assertEqual('blah', getter.getstr('section1.foo'))
 
+    def test_environ(self):
+        """Test that default dict is overridden by environment"""
+        getter = getconf.ConfigGetter('TESTNS', defaults={'DEFAULT':{"test":'54'}, 'section1':{'foo': '72'}})
+        with Environ(TESTNS_SECTION1_FOO='blah', GETCONF_SECTION1_FOO='foo'):
+            self.assertEqual('blah', getter.getstr('section1.foo'))
+
+        with Environ(GETCONF_SECTION1_FOO='foo'):
+            self.assertEqual('foo', getter.getstr('section1.foo'))
+
     def test_config_to_INI(self):
         getter = getconf.ConfigGetter('TESTNS')
         getter.getstr('foo', default='bar', doc='Foo\nbar')

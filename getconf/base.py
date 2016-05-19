@@ -107,7 +107,7 @@ class ConfigGetter(object):
         self.defaults = defaults or {}
 
         self.search_files = []
-        extra_config_file = os.environ.get(self._env_key('config'), None)
+        extra_config_file = os.environ.get(self._env_keys('config')[1], None)
 
         for path in list(config_files) + [extra_config_file]:
             if path is None:
@@ -137,18 +137,21 @@ class ConfigGetter(object):
             self.found_files, self.search_files,
         )
 
-    def _env_key(self, key, section=''):
+    def _env_keys(self, key, section=''):
         if section:
-            args = (self.namespace, section, key)
+            args = (section, key)
         else:
-            args = (self.namespace, key)
-        return '_'.join(arg.upper() for arg in args)
+            args = (key,)
+        return tuple('_'.join(arg.upper() for arg in (prefix,) + args)
+                     for prefix in (self.namespace, 'GETCONF'))
 
-    def _read_env(self, key):
+    def _read_env(self, keys):
         """Handle environ-related logic."""
-        try:
-            value = os.environ[key]
-        except KeyError:
+        for key in keys:
+            if key in os.environ:
+                value = os.environ[key]
+                break
+        else:
             raise NotFound()
 
         if compat.PY2:  # Bytes in PY2, text in PY3.
@@ -166,9 +169,9 @@ class ConfigGetter(object):
             value = value.decode('utf-8')
         return value
 
-    def _read(self, env_key, section, key, default):
+    def _read(self, env_keys, section, key, default):
         try:
-            return self._read_env(env_key)
+            return self._read_env(env_keys)
         except NotFound:
             pass
 
@@ -189,11 +192,11 @@ class ConfigGetter(object):
             section, key = key.split('.', 1)
         else:
             section = ''
-        env_key = self._env_key(key, section=section)
+        env_keys = self._env_keys(key, section=section)
         config_section = section or 'DEFAULT'
-        value = self._read(env_key=env_key, section=config_section, key=key, default=default)
+        value = self._read(env_keys=env_keys, section=config_section, key=key, default=default)
         self.seen_keys.add(
-            ConfigKey(section=config_section, entry=key, envvar=env_key,
+            ConfigKey(section=config_section, entry=key, envvar=env_keys,
                       doc=doc, default=default, type_hint=type_hint)
         )
         return value
